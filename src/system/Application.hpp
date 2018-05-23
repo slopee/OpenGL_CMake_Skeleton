@@ -12,6 +12,7 @@
 #include <string>
 
 class GLFWwindow;
+class Input;
 
 /// \class Application
 /// Base class : 
@@ -76,6 +77,7 @@ class Application
         Application(const Application&) {};
 
         std::string title;
+		Input* m_Input;
 
         virtual void loop();
 

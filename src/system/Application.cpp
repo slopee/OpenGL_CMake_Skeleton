@@ -12,7 +12,7 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <stdexcept>
-
+#include <system/Input.h>
 
 using namespace std;
 
@@ -44,8 +44,8 @@ Application::Application():
     }
 
     // setting the opengl version
-    int major = 3;
-    int minor = 2;
+    int major = 4;
+    int minor = 5;
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, major);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minor);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -81,9 +81,13 @@ Application::Application():
     glEnable (GL_DEPTH_TEST); // enable depth-testing
     glDepthFunc (GL_LESS); // depth-testing interprets a smaller value as "closer"
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		
+	// Keyboard events
+	glfwSetKeyCallback(window, &Input::OnSetKeyCallback);
     // vsync
     //glfwSwapInterval(false);
-
 }
 
 GLFWwindow* Application::getWindow() const
@@ -143,7 +147,7 @@ void Application::detectWindowDimensionChange()
 {
     int w,h;
     glfwGetWindowSize(getWindow(), &w, &h);
-    dimensionChange = ( w!= width or h != height) ;
+    dimensionChange = ( w!= width || h != height) ;
     if (dimensionChange) 
     {
         width = w;

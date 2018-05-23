@@ -10,9 +10,9 @@
 #define APPLICATION3D_9YCQ0OVR
 
 #define GLM_FORCE_RADIANS
-#include <glm/glm.hpp>
 #include "system/Application.hpp"
-#include "graphic/Shader.hpp"
+
+class Camera;
 
 /// \class Application3D
 /// Demo : draw a 3D shape
@@ -26,20 +26,8 @@ class Application3D : public Application
 
     private:
         float time = 0.f;
-        const int size = 100;
-
-        // shader
-        Shader vertexShader;
-        Shader fragmentShader;
-        ShaderProgram shaderProgram;
-
-        // shader matrix uniform
-        glm::mat4 projection = glm::mat4(1.0);
-        glm::mat4 view = glm::mat4(1.0);
-
-        // VBO/VAO/ibo
-        GLuint vao,vbo,ibo;
-        
+		Camera* m_Camera;
+         
 };
 
 #endif /* end of include guard: APPLICATION3D_9YCQ0OVR */

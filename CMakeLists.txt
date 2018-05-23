@@ -7,7 +7,7 @@ project (opengl-skeleton)
 # ┌──────────────────────────────────────────────────────────────────┐
 # │  Compilation flags                                               │
 # └──────────────────────────────────────────────────────────────────┘
-list(APPEND CMAKE_CXX_FLAGS "-std=c++11")
+set(CMAKE_CXX_STANDARD 17)
 add_definitions(-Wall)
 
 # ┌──────────────────────────────────────────────────────────────────┐
@@ -33,5 +33,6 @@ include_directories(lib/glm)
 # │  Build executable                                                │
 # └──────────────────────────────────────────────────────────────────┘
 file(GLOB_RECURSE source_files ${PROJECT_SOURCE_DIR}/src/*)
+include_directories(${PROJECT_SOURCE_DIR}/src/)
 add_executable(main ${source_files})
 target_link_libraries(main glfw ${GLFW_LIBRARIES} libglew_static)
