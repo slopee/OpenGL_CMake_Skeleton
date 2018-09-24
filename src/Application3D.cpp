@@ -27,9 +27,9 @@ Application3D::Application3D():
     Application()
 {
     glCheckError(__FILE__,__LINE__);	
-	m_Quad = new Quad(1);
-	m_Cube = new Cube(1);
-	m_Grid = new Grid(glm::ivec2(4, 2), glm::vec3());
+	//m_Quad = new Quad(1);
+	//m_Cube = new Cube(1);
+	m_Grid = new Grid(glm::ivec2(2, 2));
 	m_Camera = new Camera();
 }
 
@@ -50,8 +50,9 @@ void Application3D::loop()
     glClearColor(0.0,0.0,0.0,0.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	//m_Quad->Draw(t, projection, view);
-	m_Grid->Draw(t, projection, view);
+	Transform transform;	
+	m_Grid->Draw(t, projection, view, transform);
 }

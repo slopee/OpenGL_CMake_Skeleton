@@ -1,5 +1,6 @@
 #include "Grid.h"
 #include <vector>
+#include <glm/gtc/matrix_transform.inl>
 
 struct VertexInfo
 {
@@ -9,37 +10,36 @@ struct VertexInfo
 	VertexInfo(glm::vec3 pos, glm::vec3 col) : position(pos), color(glm::vec4(col.x, col.y, col.z, 1.0)) {}
 };
 
-
-
-
-Grid::Grid(glm::ivec2 size, glm::vec3 center) :
+Grid::Grid(glm::ivec2 size) :
 	m_Size(size),
-	m_VertexShader(SHADER_DIR"/shader.vert", GL_VERTEX_SHADER),
-	m_FragmentShader(SHADER_DIR"/shader.frag", GL_FRAGMENT_SHADER),
+	m_VertexShader(SHADER_DIR"/grid.vert", GL_VERTEX_SHADER),
+	m_FragmentShader(SHADER_DIR"/grid.frag", GL_FRAGMENT_SHADER),
 	m_ShaderProgram({ m_VertexShader,m_FragmentShader })
 {
 	int totalVerticesSize = (size.x + 1) * (size.y + 1);
 
 	std::vector<VertexInfo> vertices;
 	vertices.reserve(totalVerticesSize);
+
 	std::vector<GLuint> indices;
+	indices.reserve(totalVerticesSize * 4);
 	
 	/* Init algorithm to create vertices */
-	const float halfWidth = size.x / 2.0f;
-	const float halfHeight = size.x / 2.0f;
-	const auto gridOrigin = glm::vec3(center.x - halfWidth, center.y - halfHeight, center.z);
-
 	glm::vec3 color(0.0f, 1.0f, 0.0f);
 	
-	float currentY = gridOrigin.y;
-	float currentX = gridOrigin.x;
+	float currentY = 0.0f;
+	float currentX = 0.0f;
+	int verticesPerRow = 0;
 	for(int i = 0; i < totalVerticesSize; ++i)
 	{
-		vertices.push_back(VertexInfo(glm::vec3(currentX, currentY, gridOrigin.z), color));
-		if((i + 1) % size.x == 0)
+		vertices.push_back(VertexInfo(glm::vec3(currentX, currentY, 0.0f), color));
+		++verticesPerRow;
+
+		if(verticesPerRow == (size.x + 1))
 		{
 			++currentY;
-			currentX = gridOrigin.x;
+			currentX = 0.0f;
+			verticesPerRow = 0;
 		}
 		else
 		{
@@ -47,10 +47,26 @@ Grid::Grid(glm::ivec2 size, glm::vec3 center) :
 		}
 	}
 
-	for(int indexX = 0; indexX < size.x; ++indexX)
+	for(int indexY = 0; indexY < size.y; ++indexY)
 	{
-		
+		for (int indexX = 0; indexX < size.x; ++indexX)
+		{
+			int currentIndex = ((size.x + 1) * indexY) + indexX;
+
+			int increment = size.x + 1;
+
+			indices.push_back(currentIndex);
+			indices.push_back(currentIndex + 1);
+			indices.push_back(currentIndex + increment);
+			
+			indices.push_back(currentIndex + increment);
+			indices.push_back(currentIndex + 1);
+			indices.push_back(currentIndex + increment + 1);			
+		}
 	}
+
+	m_TotalIndices = indices.size();
+	
 	/* End algorithm to create vertices */
 
 
@@ -73,23 +89,30 @@ Grid::Grid(glm::ivec2 size, glm::vec3 center) :
 	glBindVertexArray(0);
 }
 
-void Grid::Draw(float time, const glm::mat4& projection, const glm::mat4& view)
+void Grid::Draw(float time, const glm::mat4& projection, const glm::mat4& view, const Transform& localTransform)
 {
 	m_ShaderProgram.use();
 
 	// Set the uniforms
 	m_ShaderProgram.setUniform("projection", projection);
 	m_ShaderProgram.setUniform("view", view);
+	
+	auto transformation = glm::mat4();	
+	
+	m_ShaderProgram.setUniform("transformation", transformation);
+	
 
 	// Bind VAO
 	glBindVertexArray(m_Vao);
 	
+	//mProjectionMatrix = glm::mat4();
+
 	//m_ShaderProgram.setUniform("size", m_Size);
 
 	// Draw Triangles depending on the size
 	glDrawElements(
 		GL_TRIANGLES,      // mode
-		18,         // count
+		m_TotalIndices,         // count
 		GL_UNSIGNED_INT,   // type
 		NULL               // element array buffer offset
 	);
