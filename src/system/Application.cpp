@@ -85,7 +85,8 @@ Application::Application():
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		
 	// Keyboard events
-	glfwSetKeyCallback(window, &Input::OnSetKeyCallback);
+	Input::RegisterToGlfwCallbacks(window);
+	
     // vsync
     //glfwSwapInterval(false);
 }

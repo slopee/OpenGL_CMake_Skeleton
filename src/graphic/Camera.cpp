@@ -7,6 +7,7 @@
 #include <iostream>
 
 static const float INCREMENT_ANGLE = 5;
+static const float ZOOM_DISTANCE = 0.5f;
 
 using namespace glm;
 
@@ -15,26 +16,38 @@ Camera::Camera() :
 	m_Theta(0),
 	m_Phi(0)
 {		
-	Input::GetInstance().RegisterCallbackOnKeyPressed([&]()
+	Input::GetInstance().RegisterCallbackOnKeyPressed([&](const Input::InputEvent&)
 	{
 		m_Theta += INCREMENT_ANGLE;
 		
 	}, GLFW_KEY_A);
 
-	Input::GetInstance().RegisterCallbackOnKeyPressed([&]()
+	Input::GetInstance().RegisterCallbackOnKeyPressed([&](const Input::InputEvent&)
 	{
 		m_Theta -= INCREMENT_ANGLE;
 	}, GLFW_KEY_D);
 
-	Input::GetInstance().RegisterCallbackOnKeyPressed([&]()
+	Input::GetInstance().RegisterCallbackOnKeyPressed([&](const Input::InputEvent&)
 	{
 		m_Phi += INCREMENT_ANGLE;
 	}, GLFW_KEY_W);
 
-	Input::GetInstance().RegisterCallbackOnKeyPressed([&]()
+	Input::GetInstance().RegisterCallbackOnKeyPressed([&](const Input::InputEvent&)
 	{
 		m_Phi -= INCREMENT_ANGLE;
 	}, GLFW_KEY_S);
+
+	Input::GetInstance().RegisterOnMouseWheel([&](const Input::MouseScroll& scroll)
+	{
+		if(scroll.direction == Input::MouseScroll::DOWN)
+		{
+			m_Distance += ZOOM_DISTANCE;
+		}
+		else
+		{
+			m_Distance -= ZOOM_DISTANCE;
+		}		
+	});
 }
 
 glm::mat4 Camera::GetProjectionMatrix(float height, float windowRatio) const
