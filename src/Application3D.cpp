@@ -30,7 +30,7 @@ Application3D::Application3D():
 	//m_Quad = new Quad(1);
 	//m_Cube = new Cube(1);
 	m_Grid = new Grid(glm::ivec2(2, 2));
-	m_Camera = new Camera();
+	m_Camera = new Camera(getHeight(), getWindowRatio());
 }
 
 void Application3D::loop()
@@ -42,8 +42,8 @@ void Application3D::loop()
     float t = getTime();
     // set matrix : projection + view
     
-	glm::mat4 projection = m_Camera->GetProjectionMatrix(getHeight(), getWindowRatio());
-	glm::mat4 view = m_Camera->GetViewMatrix();
+	const auto& projection = m_Camera->GetProjectionMatrix();
+	const auto& view = m_Camera->GetViewMatrix();
 	
     // clear
     glClear(GL_COLOR_BUFFER_BIT);

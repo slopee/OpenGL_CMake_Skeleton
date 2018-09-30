@@ -5,61 +5,83 @@
 #include "system/Input.h"
 #include "GLFW/glfw3.h"
 #include <iostream>
+#include "system/InputEvent.h"
 
-static const float INCREMENT_ANGLE = 5;
+static const float PAN_MULTIPLIER = 0.01f;
 static const float ZOOM_DISTANCE = 0.5f;
 
 using namespace glm;
 
-Camera::Camera() : 
-	m_Distance(10),
+//---------------------------------------------------------------------------------------------------------------------
+Camera::Camera(float height, float windowRatio) :
+	m_Translation(0.0f, 0.0f, -10.0f),
 	m_Theta(0),
 	m_Phi(0)
-{		
-	Input::GetInstance().RegisterCallbackOnKeyPressed([&](const Input::InputEvent&)
-	{
-		m_Theta += INCREMENT_ANGLE;
-		
-	}, GLFW_KEY_A);
+{
+	CalculateProjectionMatrix(height, windowRatio);
+	CalculateViewMatrix();
 
-	Input::GetInstance().RegisterCallbackOnKeyPressed([&](const Input::InputEvent&)
+	Input::GetInstance().RegisterInputEvent<MouseScroll>([&](const MouseScroll& scroll)
 	{
-		m_Theta -= INCREMENT_ANGLE;
-	}, GLFW_KEY_D);
-
-	Input::GetInstance().RegisterCallbackOnKeyPressed([&](const Input::InputEvent&)
-	{
-		m_Phi += INCREMENT_ANGLE;
-	}, GLFW_KEY_W);
-
-	Input::GetInstance().RegisterCallbackOnKeyPressed([&](const Input::InputEvent&)
-	{
-		m_Phi -= INCREMENT_ANGLE;
-	}, GLFW_KEY_S);
-
-	Input::GetInstance().RegisterOnMouseWheel([&](const Input::MouseScroll& scroll)
-	{
-		if(scroll.direction == Input::MouseScroll::DOWN)
+		if(scroll.direction == MouseScroll::DOWN)
 		{
-			m_Distance += ZOOM_DISTANCE;
+			m_Translation.z += ZOOM_DISTANCE;
 		}
 		else
 		{
-			m_Distance -= ZOOM_DISTANCE;
+			m_Translation.z -= ZOOM_DISTANCE;
 		}		
+		CalculateViewMatrix();
+	});
+
+	Input::GetInstance().RegisterInputEvent<MouseRotation>([&](const MouseRotation& rotation)
+	{
+		if(rotation.xDelta != 0)
+		{
+			m_Theta += rotation.xDelta;
+		}
+
+		if (rotation.yDelta != 0)
+		{
+			m_Phi += rotation.yDelta;
+		}
+		CalculateViewMatrix();
+	});
+
+	Input::GetInstance().RegisterInputEvent<MousePan>([&](const MousePan& pan)
+	{		
+		m_Translation.x += pan.xDelta * PAN_MULTIPLIER;
+		m_Translation.y += pan.yDelta * PAN_MULTIPLIER;
+		CalculateViewMatrix();
 	});
 }
 
-glm::mat4 Camera::GetProjectionMatrix(float height, float windowRatio) const
+//---------------------------------------------------------------------------------------------------------------------
+const glm::mat4& Camera::GetProjectionMatrix() const
 {
-	return perspective(float(2.0*atan(height / 1920.f)), windowRatio, 0.1f, 100.f);
+	return m_ProjectionMatrix;
 }
 
-glm::mat4 Camera::GetViewMatrix() const
+//---------------------------------------------------------------------------------------------------------------------
+const glm::mat4& Camera::GetViewMatrix() const
 {	
-	const auto cameraDistance = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -m_Distance));
+	
+
+	return m_ViewMatrix;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void Camera::CalculateProjectionMatrix(float height, float windowRatio)
+{
+	m_ProjectionMatrix = perspective(float(2.0*atan(height / 1920.f)), windowRatio, 0.1f, 100.f);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void Camera::CalculateViewMatrix()
+{
+	const auto cameraDistance = glm::translate(glm::mat4(), m_Translation);
 	const auto phiRotation = glm::rotate(glm::mat4(), radians(m_Phi), vec3(1.0f, 0.0f, 0.0f));
 	const auto thetaRotation = glm::rotate(glm::mat4(), radians(m_Theta), vec3(0.0f, 1.0f, 0.0f));
 
-	return cameraDistance * phiRotation * thetaRotation;
+	m_ViewMatrix = cameraDistance * phiRotation * thetaRotation;
 }

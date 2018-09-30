@@ -9,6 +9,7 @@ project (opengl-skeleton)
 # └──────────────────────────────────────────────────────────────────┘
 set(CMAKE_CXX_STANDARD 17)
 add_definitions(-Wall)
+add_definitions(-fno-rtti)
 
 # ┌──────────────────────────────────────────────────────────────────┐
 # │  Load libraries                                                  │

@@ -5,13 +5,20 @@
 class Camera
 {
 public:
-	Camera();
+	Camera(float height, float windowRatio);
 
-	glm::mat4 GetProjectionMatrix(float height, float windowRatio) const;
-	glm::mat4 GetViewMatrix() const;
-	
+	const glm::mat4& GetProjectionMatrix() const;
+	const glm::mat4& GetViewMatrix() const;
+
+private:
+	void CalculateProjectionMatrix(float height, float windowRatio);
+	void CalculateViewMatrix();
+
 private:	
-	float m_Distance;
+	glm::vec3 m_Translation;
 	float m_Theta;
 	float m_Phi;
+
+	glm::mat4 m_ViewMatrix;
+	glm::mat4 m_ProjectionMatrix;
 };
