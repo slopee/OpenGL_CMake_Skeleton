@@ -1,6 +1,7 @@
 #include "Grid.h"
 #include <vector>
 #include <glm/gtc/matrix_transform.inl>
+#include "graphic/Transform.h"
 
 struct VertexInfo
 {
@@ -10,6 +11,7 @@ struct VertexInfo
 	VertexInfo(glm::vec3 pos, glm::vec3 col) : position(pos), color(glm::vec4(col.x, col.y, col.z, 1.0)) {}
 };
 
+//---------------------------------------------------------------------------------------------------------------------
 Grid::Grid(glm::ivec2 size) :
 	m_Size(size),
 	m_VertexShader(SHADER_DIR"/grid.vert", GL_VERTEX_SHADER),
@@ -17,6 +19,7 @@ Grid::Grid(glm::ivec2 size) :
 	m_ShaderProgram({ m_VertexShader,m_FragmentShader })
 {
 	int totalVerticesSize = (size.x + 1) * (size.y + 1);
+	glm::vec2 halfSize(size.x / 2.0f, size.y / 2.0f);
 
 	std::vector<VertexInfo> vertices;
 	vertices.reserve(totalVerticesSize);
@@ -32,7 +35,7 @@ Grid::Grid(glm::ivec2 size) :
 	int verticesPerRow = 0;
 	for(int i = 0; i < totalVerticesSize; ++i)
 	{
-		vertices.push_back(VertexInfo(glm::vec3(currentX, currentY, 0.0f), color));
+		vertices.push_back(VertexInfo(glm::vec3(currentX - halfSize.x, currentY - halfSize.y, 0.0f), color));
 		++verticesPerRow;
 
 		if(verticesPerRow == (size.x + 1))
@@ -89,6 +92,7 @@ Grid::Grid(glm::ivec2 size) :
 	glBindVertexArray(0);
 }
 
+//---------------------------------------------------------------------------------------------------------------------
 void Grid::Draw(float time, const glm::mat4& projection, const glm::mat4& view, const Transform& localTransform)
 {
 	m_ShaderProgram.use();
@@ -96,18 +100,22 @@ void Grid::Draw(float time, const glm::mat4& projection, const glm::mat4& view, 
 	// Set the uniforms
 	m_ShaderProgram.setUniform("projection", projection);
 	m_ShaderProgram.setUniform("view", view);
-	
-	auto transformation = glm::mat4();	
-	
-	m_ShaderProgram.setUniform("transformation", transformation);
-	
+	m_ShaderProgram.setUniform("transformation", localTransform.GetTransformMatrix());
 
+	auto identity = glm::mat4();
+	auto transform = localTransform.GetTransformMatrix();
+
+	DrawMesh();
+
+	// Unbind program
+	m_ShaderProgram.unuse();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void Grid::DrawMesh() const
+{
 	// Bind VAO
 	glBindVertexArray(m_Vao);
-	
-	//mProjectionMatrix = glm::mat4();
-
-	//m_ShaderProgram.setUniform("size", m_Size);
 
 	// Draw Triangles depending on the size
 	glDrawElements(
@@ -119,9 +127,10 @@ void Grid::Draw(float time, const glm::mat4& projection, const glm::mat4& view, 
 
 	// Unbind VAO
 	glBindVertexArray(0);
-
-	// Unbind program
-	m_ShaderProgram.unuse();
 }
 
-
+//---------------------------------------------------------------------------------------------------------------------
+const glm::ivec2& Grid::GetSize() const
+{
+	return m_Size;
+}

@@ -1,83 +1,57 @@
 #include "Cube.h"
+#include "Grid.h"
 #include <vector>
+#include <glm/gtc/matrix_transform.inl>
+#include "graphic/Transform.h"
 
-struct VertexInfo
-{
-	glm::vec3 position;
-	glm::vec4 color;
-
-	VertexInfo(glm::vec3 pos, glm::vec3 col) : position(pos), color(glm::vec4(col.x, col.y, col.z, 1.0)) {}
-};
-
-
-Cube::Cube(float size) :
+//---------------------------------------------------------------------------------------------------------------------
+Cube::Cube(float size, Grid* const grid) :
 	m_Size(size),
+	m_Grid(grid),
 	m_VertexShader(SHADER_DIR"/cube.vert", GL_VERTEX_SHADER),
 	m_FragmentShader(SHADER_DIR"/cube.frag", GL_FRAGMENT_SHADER),
 	m_ShaderProgram({ m_VertexShader,m_FragmentShader })
 {
-	std::vector<VertexInfo> vertices;
-	std::vector<GLuint> indices;
+	const auto& gridSize = m_Grid->GetSize();
+	const glm::vec2 gridHalfSize(gridSize.x / 2.0f, gridSize.y / 2.0f);
 
-	// Front Face
-	vertices.emplace_back(VertexInfo(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0, 1.0, 0.0)));
-	vertices.emplace_back(VertexInfo(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0, 1.0, 0.0)));
-	vertices.emplace_back(VertexInfo(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0, 1.0, 0.0)));
-	vertices.emplace_back(VertexInfo(glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(0.0, 1.0, 0.0)));
+	// Front
+	Transform frontFace;
+	frontFace.position = glm::vec3(0, 0, gridHalfSize.y);
+	m_FacesTransforms.push_back(frontFace);
+	
+	//Left
+	Transform leftFace;
+	leftFace.position = glm::vec3(gridHalfSize.x, 0, 0);
+	leftFace.rotation = glm::vec3(0, -90.0f, 0);
+	//leftFace.scale = glm::vec3(2.0f, 2.0f, 2.0f);
+	m_FacesTransforms.push_back(leftFace);
 
+	//Right
+	Transform rightFace;
+	rightFace.position = glm::vec3(-gridHalfSize.x, 0, 0);
+	rightFace.rotation = glm::vec3(0, 90.0f, 0);
+	m_FacesTransforms.push_back(rightFace);
 
-	indices.emplace_back(0);
-	indices.emplace_back(1);
-	indices.emplace_back(2);
-	indices.emplace_back(1);
-	indices.emplace_back(3);
-	indices.emplace_back(2);
+	//Back
+	Transform backFace;
+	backFace.position = glm::vec3(0, 0, -gridHalfSize.y);
+	m_FacesTransforms.push_back(backFace);
 
-	// Right Face
-	vertices.emplace_back(VertexInfo(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(1.0, 0.0, 0.0)));
-	vertices.emplace_back(VertexInfo(glm::vec3(1.0f, 0.0f, -1.0f), glm::vec3(1.0, 0.0, 0.0)));
-	vertices.emplace_back(VertexInfo(glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(1.0, 0.0, 0.0)));
-	vertices.emplace_back(VertexInfo(glm::vec3(1.0f, 1.0f, -1.0f), glm::vec3(1.0, 0.0, 0.0)));
+	// Top
+	Transform topFace;
+	topFace.position = glm::vec3(0, gridHalfSize.y, 0);
+	topFace.rotation = glm::vec3(90.0f, 0, 0);
+	m_FacesTransforms.push_back(topFace);
 
-	indices.emplace_back(0 + 4);
-	indices.emplace_back(1 + 4);
-	indices.emplace_back(2 + 4);
-	indices.emplace_back(1 + 4);
-	indices.emplace_back(3 + 4);
-	indices.emplace_back(2 + 4);
-
-	// Left Face
-	vertices.emplace_back(VertexInfo(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0, 0.0, 1.0)));
-	vertices.emplace_back(VertexInfo(glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0, 0.0, 1.0)));
-	vertices.emplace_back(VertexInfo(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0, 0.0, 1.0)));
-	vertices.emplace_back(VertexInfo(glm::vec3(0.0f, 1.0f, -1.0f), glm::vec3(0.0, 0.0, 1.0)));
-
-	indices.emplace_back(0 + 8);
-	indices.emplace_back(1 + 8);
-	indices.emplace_back(2 + 8);
-	indices.emplace_back(1 + 8);
-	indices.emplace_back(3 + 8);
-	indices.emplace_back(2 + 8);
-
-	glGenVertexArrays(1, &m_Vao);
-	glBindVertexArray(m_Vao);
-
-	GLuint vbo;
-	GLuint ibo;
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(VertexInfo), vertices.data(), GL_STATIC_DRAW);
-
-	m_ShaderProgram.setAttribute("position", 3, sizeof(VertexInfo), offsetof(VertexInfo, position));
-	m_ShaderProgram.setAttribute("color", 4, sizeof(VertexInfo), offsetof(VertexInfo, color));
-
-	glGenBuffers(1, &ibo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
-
-	glBindVertexArray(0);
+	// Bottom
+	Transform bottomFace;
+	bottomFace.position = glm::vec3(0, -gridHalfSize.y, 0);
+	bottomFace.rotation = glm::vec3(90.0f, 0, 0);
+	m_FacesTransforms.push_back(bottomFace);
 }
 
+//---------------------------------------------------------------------------------------------------------------------
 void Cube::Draw(float time, const glm::mat4& projection, const glm::mat4& view)
 {
 	m_ShaderProgram.use();
@@ -85,23 +59,26 @@ void Cube::Draw(float time, const glm::mat4& projection, const glm::mat4& view)
 	// Set the uniforms
 	m_ShaderProgram.setUniform("projection", projection);
 	m_ShaderProgram.setUniform("view", view);
-
-	// Bind VAO
-	glBindVertexArray(m_Vao);
+	m_ShaderProgram.setUniform("size", m_Size);	
 	
-	m_ShaderProgram.setUniform("size", m_Size);
-
-	// Draw Triangles depending on the size
-	glDrawElements(
-		GL_TRIANGLES,      // mode
-		18,         // count
-		GL_UNSIGNED_INT,   // type
-		NULL               // element array buffer offset
-	);
-
-	// Unbind VAO
-	glBindVertexArray(0);
-
+	glm::vec3 colors[6] {
+		glm::vec3(1.0f, 0.0f, 0.0f),
+		glm::vec3(0.0f, 1.0f, 0.0f),
+		glm::vec3(0.0f, 0.0f, 1.0f),
+		glm::vec3(0.5f, 0.5f, 0.0f),
+		glm::vec3(0.0f, 0.5f, 0.5f),
+		glm::vec3(0.5f, 0.5f, 0.5f),
+	};
+	
+	int i = 0;
+	for(auto& transform : m_FacesTransforms)
+	{
+		m_ShaderProgram.setUniform("faceColor", colors[i]);
+		m_ShaderProgram.setUniform("transformation", transform.GetTransformMatrix());
+		m_Grid->DrawMesh();
+		++i;
+	}
+	
 	// Unbind program
 	m_ShaderProgram.unuse();
 }
