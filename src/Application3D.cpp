@@ -20,6 +20,7 @@
 #include <app/Grid.h>
 #include "system/InputEvent.h"
 #include "system/Input.h"
+#include <glm/gtx/quaternion.hpp>
 
 Quad* m_Quad;
 Cube* m_Cube;
@@ -63,7 +64,7 @@ void Application3D::loop()
 
 	const auto& projection = m_Camera->GetProjectionMatrix();
 	const auto& view = m_Camera->GetViewMatrix();
-
+		
 	// clear
 	glClear(GL_COLOR_BUFFER_BIT);
 	glClearColor(0.0, 0.0, 0.0, 0.0);

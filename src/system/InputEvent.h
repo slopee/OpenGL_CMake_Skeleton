@@ -128,7 +128,7 @@ struct MouseMoved : InputEvent<MouseMoved, BaseInputEvent::MouseMoved>
 };
 
 //---------------------------------------------------------------------------------------------------------------------
-struct MousePan : InputEvent<MouseMoved, BaseInputEvent::MousePan>
+struct MousePan : InputEvent<MousePan, BaseInputEvent::MousePan>
 {
 	double xDelta;
 	double yDelta;

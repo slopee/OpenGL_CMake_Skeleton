@@ -79,6 +79,7 @@ void Camera::CalculateProjectionMatrix(float height, float windowRatio)
 //---------------------------------------------------------------------------------------------------------------------
 void Camera::CalculateViewMatrix()
 {
+	//const auto translation = -m_Translation.z;
 	const auto cameraDistance = glm::translate(glm::mat4(), m_Translation);
 	const auto phiRotation = glm::rotate(glm::mat4(), radians(m_Phi), vec3(1.0f, 0.0f, 0.0f));
 	const auto thetaRotation = glm::rotate(glm::mat4(), radians(m_Theta), vec3(0.0f, 1.0f, 0.0f));
