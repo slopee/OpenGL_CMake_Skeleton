@@ -7,12 +7,8 @@
  */
 #include "Application3D.hpp"
 #include <GL/glew.h>
-#include <vector>
-
 #include <glm/glm.hpp>
-#include <iostream>
 #include "utils/glError.hpp"
-
 #include <GLFW/glfw3.h>
 #include <graphic/Camera.h>
 #include <app/Quad.h>
@@ -20,7 +16,7 @@
 #include <app/Grid.h>
 #include "system/InputEvent.h"
 #include "system/Input.h"
-#include <glm/gtx/quaternion.hpp>
+#include "debug/Axis.h"
 
 Quad* m_Quad;
 Cube* m_Cube;
@@ -32,10 +28,10 @@ Application3D::Application3D():
 	Application()
 {
 	glCheckError(__FILE__,__LINE__);
-	//m_Quad = new Quad(1);
+	m_Quad = new Quad(1);
 	m_Grid = new Grid(glm::ivec2(10, 10));
 	m_Cube = new Cube(2, m_Grid);
-	m_Camera = new Camera(getHeight(), getWindowRatio());
+	m_Camera = new Camera(getHeight(), getWindowRatio());	
 
 	Input::GetInstance().RegisterInputEvent<KeyEvent>([&](const KeyEvent& key)
 	{
@@ -58,7 +54,7 @@ void Application3D::loop()
 	// exit on window close button pressed
 	if (glfwWindowShouldClose(getWindow()))
 		exit();
-
+	
 	float t = getTime();
 	// set matrix : projection + view
 
@@ -73,6 +69,7 @@ void Application3D::loop()
 	glPolygonMode(GL_FRONT_AND_BACK, m_FillType);
 
 	//m_Quad->Draw(t, projection, view);	
-	//m_Grid->Draw(t, projection, view, transform);
+	//m_Grid->Draw(t, projection, view, transform);	
 	m_Cube->Draw(t, projection, view);
+	m_Camera->Draw(t, projection, view);	
 }

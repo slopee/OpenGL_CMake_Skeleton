@@ -5,8 +5,9 @@ in vec4 color;
 
 uniform mat4 projection;
 uniform mat4 view;
-uniform mat4 transformation;
 uniform float size;
+
+uniform mat4 transformation;
 uniform vec3 faceColor;
 
 out vec4 fColor;

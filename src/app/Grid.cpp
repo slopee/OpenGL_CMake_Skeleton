@@ -71,8 +71,6 @@ Grid::Grid(glm::ivec2 size) :
 	m_TotalIndices = indices.size();
 	
 	/* End algorithm to create vertices */
-
-
 	glGenVertexArrays(1, &m_Vao);
 	glBindVertexArray(m_Vao);
 

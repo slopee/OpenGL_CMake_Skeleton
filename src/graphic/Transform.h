@@ -8,6 +8,10 @@ public:
 	~Transform() = default;
 
 	glm::mat4 GetTransformMatrix() const;
+	glm::mat4 GetInverseTransformMatrix() const;
+	glm::mat4 Transform::GetRotationMatrix() const;
+	glm::mat4 Transform::GetTranslationMatrix() const;
+	glm::mat4 Transform::GetScaleMatrix() const;
 
 	glm::vec3 position;
 	glm::vec3 rotation;
