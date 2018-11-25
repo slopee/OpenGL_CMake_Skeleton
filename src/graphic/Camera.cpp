@@ -25,9 +25,9 @@ static CameraDebugDrawer* cameraDebugDrawer = nullptr;
 //---------------------------------------------------------------------------------------------------------------------
 Camera::Camera(float height, float windowRatio)	
 {
-	m_DebugCameraTransform.position.z = -30.0f;
+	m_DebugCameraTransform.position.z = -15.0f;
 	m_DebugCameraTransform.rotation.y = 90.0f;
-	m_RenderCameraTransform.position.z = 0.0f;
+	m_RenderCameraTransform.position.z = -10.0f;
 
 	debugAxis = new Axis();	
 
@@ -41,11 +41,11 @@ Camera::Camera(float height, float windowRatio)
 
 //---------------------------------------------------------------------------------------------------------------------
 void Camera::Draw(float time, const glm::mat4& projection, const glm::mat4& view)
-{
-	//if(isDebugCameraOn)
-	{
-		debugAxis->Draw(time, projection, m_RenderCameraTransform.rotation);
+{	
+	if(isDebugCameraOn)
+	{				
 		cameraDebugDrawer->Draw(time, projection, view);
+		debugAxis->Draw(time, projection, m_RenderCameraTransform.rotation);
 	}
 }
 
@@ -58,10 +58,6 @@ const glm::mat4& Camera::GetProjectionMatrix() const
 //---------------------------------------------------------------------------------------------------------------------
 const glm::mat4& Camera::GetViewMatrix() const
 {	
-	if(!isDebugCameraOn)
-	{
-		return m_ViewMatrix;
-	}
 	return m_ViewMatrix;
 }
 

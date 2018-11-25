@@ -138,6 +138,11 @@ std::vector<glm::vec3> CameraDebugDrawer::CalculateVerticesPositions(
 	const auto cameraPosition = glm::vec3(inverseTransform * glm::vec4(0.0f, 0.0f, 0.0, 1.0f));
 	const auto cameraDirection = glm::vec3(inverseTransform * glm::vec4(0.0f, 0.0f, -1.0f, 1.0f));
 	const auto cameraUp = glm::vec3(inverseTransform * glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+	const auto cameraRight = glm::vec3(inverseTransform * glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+	
+	const auto unitDirection = cameraDirection - cameraPosition;
+	const auto unitUp = cameraUp - cameraPosition;
+	const auto unitRight = cameraRight - cameraPosition;
 
 	vertices.push_back(cameraPosition); // 0
 	vertices.push_back(cameraDirection); // 1		
@@ -147,24 +152,23 @@ std::vector<glm::vec3> CameraDebugDrawer::CalculateVerticesPositions(
 	nearDist -= 0.05f;
 	const float nearHeight = 2 * tan(fov / 2) * nearDist;
 	const float nearWidth = nearHeight * ratio;
-	const auto direction = cameraDirection - cameraPosition;
-	const float nearZ = cameraPosition.z + (direction.z * nearDist);
+	const auto nearCenter = cameraPosition + (unitDirection * nearDist);
 
-	vertices.push_back(glm::vec3(cameraDirection.x - nearWidth / 2, cameraDirection.y + nearHeight / 2, nearZ)); // 3
-	vertices.push_back(glm::vec3(cameraDirection.x + nearWidth / 2, cameraDirection.y + nearHeight / 2, nearZ)); // 4
-	vertices.push_back(glm::vec3(cameraDirection.x + nearWidth / 2, cameraDirection.y - nearHeight / 2, nearZ)); // 5
-	vertices.push_back(glm::vec3(cameraDirection.x - nearWidth / 2, cameraDirection.y - nearHeight / 2, nearZ)); // 6
+	vertices.push_back(nearCenter + (unitUp * nearHeight / 2.0f) - (unitRight * nearWidth / 2.0f)); // 3
+	vertices.push_back(nearCenter + (unitUp * nearHeight / 2.0f) + (unitRight * nearWidth / 2.0f)); // 4
+	vertices.push_back(nearCenter - (unitUp * nearHeight / 2.0f) + (unitRight * nearWidth / 2.0f)); // 5
+	vertices.push_back(nearCenter - (unitUp * nearHeight / 2.0f) - (unitRight * nearWidth / 2.0f)); // 6
 	
 	// Far plane
 	farDist -= 0.05f;
 	const float farHeight = 2 * tan(fov / 2) * farDist;
 	const float farWidth = farHeight * ratio;
-	const float farZ = cameraDirection.z + (direction.z * farDist);
+	const auto farCenter = cameraDirection + (unitDirection * farDist);
 
-	vertices.push_back(glm::vec3(cameraDirection.x - farWidth / 2, cameraDirection.y + farHeight / 2, farZ)); // 7
-	vertices.push_back(glm::vec3(cameraDirection.x + farWidth / 2, cameraDirection.y + farHeight / 2, farZ)); // 8
-	vertices.push_back(glm::vec3(cameraDirection.x + farWidth / 2, cameraDirection.y - farHeight / 2, farZ)); // 9
-	vertices.push_back(glm::vec3(cameraDirection.x - farWidth / 2, cameraDirection.y - farHeight / 2, farZ)); // 10
+	vertices.push_back(farCenter + (unitUp * farHeight / 2.0f) - (unitRight * farWidth / 2.0f)); // 7
+	vertices.push_back(farCenter + (unitUp * farHeight / 2.0f) + (unitRight * farWidth / 2.0f)); // 8
+	vertices.push_back(farCenter - (unitUp * farHeight / 2.0f) + (unitRight * farWidth / 2.0f)); // 9
+	vertices.push_back(farCenter - (unitUp * farHeight / 2.0f) - (unitRight * farWidth / 2.0f)); // 10
 	
 	return vertices;
 }
