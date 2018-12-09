@@ -24,7 +24,7 @@ QuadTree::QuadTree(const BoundingBox& boundingBox, const glm::vec2& distanceConf
 		finalDistances[j].y = distanceConfig.x + (m_LevelsConfig[i].max * distDifference);
 	}
 
-	m_RootNode = new QuadTreeNode(boundingBox, 0, finalDistances, grid);
+	m_RootNode = new QuadTreeNode(boundingBox, 0, glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), finalDistances, grid);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

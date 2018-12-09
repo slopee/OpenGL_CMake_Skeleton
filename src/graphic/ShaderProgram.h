@@ -22,7 +22,7 @@ public:
 	GLint uniform(const std::string& name);
 	GLint operator[](const std::string& name);
 
-	// same things with attributes
+	/* same things with attributes
 	GLint attribute(const std::string& name);
 	void setAttribute(const std::string& name, GLint size, GLsizei stride, GLuint offset,
 		GLboolean normalize,
@@ -35,6 +35,7 @@ public:
 		GLenum type);
 
 	void setAttribute(const std::string& name, GLint size, GLsizei stride, GLuint offset);
+	*/
 
 	// affect uniform
 	void setUniform(const std::string& name, float x, float y, float z);

@@ -2,7 +2,6 @@
 
 uniform sampler2D textureSampler;
 
-in vec4 fColor;
 in vec2 fUv;
 // output
 out vec4 color;
@@ -10,5 +9,5 @@ out vec4 color;
 void main(void)
 {
     //color = fColor;
-    color = vec4(texture(textureSampler, fUv).rgb, 1.0f);
+    color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
 }

@@ -63,7 +63,7 @@ GLint ShaderProgram::uniform(const std::string &name)
 	else
 		return it->second;
 }
-
+/*
 GLint ShaderProgram::attribute(const std::string& name)
 {
 	GLint attrib = glGetAttribLocation(handle, name.c_str());
@@ -106,7 +106,7 @@ void ShaderProgram::setAttribute(const std::string& name, GLint size, GLsizei st
 	setAttribute(name, size, stride, offset, false, GL_FLOAT);
 }
 
-
+*/
 void ShaderProgram::setUniform(const std::string& name, float x, float y, float z)
 {
 	glUniform3f(uniform(name), x, y, z);

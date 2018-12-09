@@ -38,7 +38,7 @@ Camera::Camera(float height, float windowRatio)
 	CalculateProjectionMatrix(height, windowRatio);
 	CalculateViewMatrix();
 
-	//cameraDebugDrawer = new CameraDebugDrawer(m_RenderCameraTransform, fov, NEAR_DIST, FAR_DIST, ratio);
+	cameraDebugDrawer = new CameraDebugDrawer(m_RenderCameraTransform, fov, NEAR_DIST, FAR_DIST, ratio);
 
 	RegisterInputEvents();
 }

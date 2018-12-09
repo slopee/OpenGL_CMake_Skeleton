@@ -4,10 +4,16 @@
 #include <app/Grid.h>
 #include <glm/gtc/matrix_transform.inl>
 
-QuadTreeNode::QuadTreeNode(const BoundingBox& boundingBox, const int nodeLevel, const std::vector<glm::vec2>& levelConfig, Grid* grid) :
+QuadTreeNode::QuadTreeNode(
+	const BoundingBox& boundingBox, 
+	const int nodeLevel, 
+	const glm::vec4& uvLimits,
+	const std::vector<glm::vec2>& levelConfig, 
+	Grid* grid) :
 	m_BoundingBox(boundingBox),
 	m_CurrentLevel(nodeLevel),
 	m_MinMaxDistances(levelConfig[nodeLevel]),
+	m_UvLimits(uvLimits),
 	m_Grid(grid)
 {
 	const auto center = boundingBox.GetCenter();
@@ -22,18 +28,24 @@ QuadTreeNode::QuadTreeNode(const BoundingBox& boundingBox, const int nodeLevel, 
 	{
 		const auto boundingWidth = boundingBox.GetWidth() / 2.0f;
 		const auto boundingHeight = boundingBox.GetHeight() / 2.0f;
+
+		const auto halfUv = glm::vec2(uvLimits.x + ((uvLimits.z - uvLimits.x) / 2.0f), uvLimits.y + ((uvLimits.w - uvLimits.y) / 2.0f));
 		
 		const BoundingBox bottomLeftBoundingBox(center.x - boundingWidth, center.y - boundingHeight, boundingWidth, boundingHeight);
-		m_Children[0] = new QuadTreeNode(bottomLeftBoundingBox, nodeLevel + 1, levelConfig, grid);
+		const glm::vec4 bottomLeftUvLimits(uvLimits.x, uvLimits.y, halfUv.x, halfUv.y);
+		m_Children[0] = new QuadTreeNode(bottomLeftBoundingBox, nodeLevel + 1, bottomLeftUvLimits, levelConfig, grid);
 
 		const BoundingBox topLeftBoundingBox(center.x - boundingWidth, center.y, boundingWidth, boundingHeight);
-		m_Children[1] = new QuadTreeNode(topLeftBoundingBox, nodeLevel + 1, levelConfig, grid);
+		const glm::vec4 topLeftUvLimits(uvLimits.x, halfUv.y, halfUv.x, uvLimits.w);
+		m_Children[1] = new QuadTreeNode(topLeftBoundingBox, nodeLevel + 1, topLeftUvLimits, levelConfig, grid);
 				
 		const BoundingBox bottomRightBoundingBox(center.x, center.y - boundingHeight, boundingWidth, boundingHeight);
-		m_Children[2] = new QuadTreeNode(bottomRightBoundingBox, nodeLevel + 1, levelConfig, grid);
+		const glm::vec4 bottomRightUvLimits(halfUv.x, uvLimits.y, uvLimits.z, halfUv.y);
+		m_Children[2] = new QuadTreeNode(bottomRightBoundingBox, nodeLevel + 1, bottomRightUvLimits, levelConfig, grid);
 		
 		const BoundingBox topRightBoundingBox(center.x, center.y, boundingWidth, boundingHeight);
-		m_Children[3] = new QuadTreeNode(topRightBoundingBox, nodeLevel + 1, levelConfig, grid);
+		const glm::vec4 topRightUvLimits(halfUv.x, halfUv.y, uvLimits.z, uvLimits.w);
+		m_Children[3] = new QuadTreeNode(topRightBoundingBox, nodeLevel + 1, topRightUvLimits, levelConfig, grid);
 	}
 }
 
@@ -57,7 +69,7 @@ void QuadTreeNode::Draw(ShaderProgram& shaderProgram, const glm::mat4& viewMatri
 	else if(cameraDistance <= m_MinMaxDistances.y || m_CurrentLevel > 0)
 	{		
 		DrawNode(shaderProgram);
-	}	
+	}		
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -76,5 +88,6 @@ void QuadTreeNode::DrawNode(ShaderProgram& shaderProgram)
 	shaderProgram.setUniform("gridScale", gridScale);
 	shaderProgram.setUniform("nodeColor", colors[m_CurrentLevel]);
 	shaderProgram.setUniform("nodeTransformation", m_Transform.GetTransformMatrix());
+	shaderProgram.setUniform("uvLimits", m_UvLimits);
 	m_Grid->DrawMesh();
 }

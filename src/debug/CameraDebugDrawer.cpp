@@ -12,8 +12,8 @@ CameraDebugDrawer::CameraDebugDrawer(
 	float farDist,
 	float ratio) :
 	m_ShaderProgram({ 
-		Shader(SHADER_DIR"/axis.vert", GL_VERTEX_SHADER),
-		Shader(SHADER_DIR"/axis.frag", GL_FRAGMENT_SHADER) })
+		Shader(SHADER_DIR"/camera_debug.vert", GL_VERTEX_SHADER),
+		Shader(SHADER_DIR"/camera_debug.frag", GL_FRAGMENT_SHADER) })
 {
 	glGenVertexArrays(1, &m_Vao);
 	glBindVertexArray(m_Vao);
@@ -67,10 +67,15 @@ CameraDebugDrawer::CameraDebugDrawer(
 	GLuint ibo;
 	glGenBuffers(1, &m_Vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, m_Vbo);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_DYNAMIC_DRAW);
 
-	m_ShaderProgram.setAttribute("position", 3, sizeof(glm::vec3), 0);
+	glBindVertexBuffer(0, m_Vbo, 0, sizeof(glm::vec3));
 
+	// Position will always go to location 0
+	glEnableVertexAttribArray(0);
+	glVertexAttribFormat(0, 3, GL_FLOAT, GL_FALSE, 0);
+	glVertexAttribBinding(0, 0);
+	
 	glGenBuffers(1, &ibo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);

@@ -40,10 +40,19 @@ Axis::Axis() :
 	glGenBuffers(1, &m_Vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, m_Vbo);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(VertexInfo), vertices.data(), GL_STATIC_DRAW);
+	/*
+	glBindVertexBuffer(0, m_Vbo, 0, sizeof(VertexInfo));
 
-	m_ShaderProgram.setAttribute("position", 3, sizeof(VertexInfo), offsetof(VertexInfo, position));
-	m_ShaderProgram.setAttribute("color", 4, sizeof(VertexInfo), offsetof(VertexInfo, color));
+	// Position will always go to location 0
+	glEnableVertexAttribArray(0);
+	glVertexAttribFormat(0, 3, GL_FLOAT, GL_FALSE, offsetof(VertexInfo, position));
+	glVertexAttribBinding(0, 0);
 
+	// Color will always go to location 1
+	glEnableVertexAttribArray(1);
+	glVertexAttribFormat(1, 4, GL_FLOAT, GL_FALSE, offsetof(VertexInfo, color));
+	glVertexAttribBinding(1, 0);
+	*/
 	glGenBuffers(1, &m_Ibo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Ibo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);

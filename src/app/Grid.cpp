@@ -6,18 +6,14 @@
 struct VertexInfo
 {
 	glm::vec3 position;
-	glm::vec4 color;
 	glm::vec2 uv;
 
-	VertexInfo(glm::vec3 pos, glm::vec3 col, glm::vec2 uv) : position(pos), color(glm::vec4(col.x, col.y, col.z, 1.0)), uv(uv) {}
+	VertexInfo(glm::vec3 pos, glm::vec2 uv) : position(pos), uv(uv) {}
 };
 
 //---------------------------------------------------------------------------------------------------------------------
 Grid::Grid(glm::uvec2 size) :
-	m_Size(size),
-	m_VertexShader(SHADER_DIR"/grid.vert", GL_VERTEX_SHADER),
-	m_FragmentShader(SHADER_DIR"/grid.frag", GL_FRAGMENT_SHADER),
-	m_ShaderProgram({ m_VertexShader,m_FragmentShader })
+	m_Size(size)
 {
 	int totalVerticesSize = (size.x + 1) * (size.y + 1);
 	glm::vec2 halfSize(size.x / 2.0f, size.y / 2.0f);
@@ -29,14 +25,12 @@ Grid::Grid(glm::uvec2 size) :
 	indices.reserve(totalVerticesSize * 4);
 	
 	/* Init algorithm to create vertices */
-	glm::vec3 color(0.0f, 1.0f, 0.0f);
-	
 	float currentY = 0.0f;
 	float currentX = 0.0f;
 	int verticesPerRow = 0;
 	for(int i = 0; i < totalVerticesSize; ++i)
 	{
-		vertices.push_back(VertexInfo(glm::vec3(currentX - halfSize.x, currentY - halfSize.y, 0.0f), color, glm::vec2(currentX/size.x, currentY/size.y)));
+		vertices.push_back(VertexInfo(glm::vec3(currentX - halfSize.x, currentY - halfSize.y, 0.0f), glm::vec2(currentX/size.x, currentY/size.y)));
 		++verticesPerRow;
 
 		if(verticesPerRow == (size.x + 1))
@@ -80,35 +74,25 @@ Grid::Grid(glm::uvec2 size) :
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(VertexInfo), vertices.data(), GL_STATIC_DRAW);
-
-	m_ShaderProgram.setAttribute("position", 3, sizeof(VertexInfo), offsetof(VertexInfo, position));
-	m_ShaderProgram.setAttribute("color", 4, sizeof(VertexInfo), offsetof(VertexInfo, color));
-	m_ShaderProgram.setAttribute("uv", 2, sizeof(VertexInfo), offsetof(VertexInfo, uv));
 	
+	glBindVertexBuffer(0, vbo, 0, sizeof(VertexInfo));
+
+	// Position will always go to location 0
+	glEnableVertexAttribArray(0);
+	glVertexAttribFormat(0, 3, GL_FLOAT, GL_FALSE, offsetof(VertexInfo, position));
+	glVertexAttribBinding(0, 0);
+
+	// UV will always go to location 1
+	glEnableVertexAttribArray(1);
+	glVertexAttribFormat(1, 2, GL_FLOAT, GL_FALSE, offsetof(VertexInfo, uv));
+	glVertexAttribBinding(1, 0);
+	
+	// EBO
 	glGenBuffers(1, &ibo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-void Grid::Draw(float time, const glm::mat4& projection, const glm::mat4& view, const Transform& localTransform)
-{
-	m_ShaderProgram.use();
-
-	// Set the uniforms
-	m_ShaderProgram.setUniform("projection", projection);
-	m_ShaderProgram.setUniform("view", view);
-	m_ShaderProgram.setUniform("transformation", localTransform.GetTransformMatrix());
-
-	auto identity = glm::mat4();
-	auto transform = localTransform.GetTransformMatrix();
-
-	DrawMesh();
-
-	// Unbind program
-	m_ShaderProgram.unuse();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
