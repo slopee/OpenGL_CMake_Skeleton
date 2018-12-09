@@ -7,12 +7,13 @@ struct VertexInfo
 {
 	glm::vec3 position;
 	glm::vec4 color;
+	glm::vec2 uv;
 
-	VertexInfo(glm::vec3 pos, glm::vec3 col) : position(pos), color(glm::vec4(col.x, col.y, col.z, 1.0)) {}
+	VertexInfo(glm::vec3 pos, glm::vec3 col, glm::vec2 uv) : position(pos), color(glm::vec4(col.x, col.y, col.z, 1.0)), uv(uv) {}
 };
 
 //---------------------------------------------------------------------------------------------------------------------
-Grid::Grid(glm::ivec2 size) :
+Grid::Grid(glm::uvec2 size) :
 	m_Size(size),
 	m_VertexShader(SHADER_DIR"/grid.vert", GL_VERTEX_SHADER),
 	m_FragmentShader(SHADER_DIR"/grid.frag", GL_FRAGMENT_SHADER),
@@ -35,7 +36,7 @@ Grid::Grid(glm::ivec2 size) :
 	int verticesPerRow = 0;
 	for(int i = 0; i < totalVerticesSize; ++i)
 	{
-		vertices.push_back(VertexInfo(glm::vec3(currentX - halfSize.x, currentY - halfSize.y, 0.0f), color));
+		vertices.push_back(VertexInfo(glm::vec3(currentX - halfSize.x, currentY - halfSize.y, 0.0f), color, glm::vec2(currentX/size.x, currentY/size.y)));
 		++verticesPerRow;
 
 		if(verticesPerRow == (size.x + 1))
@@ -82,7 +83,8 @@ Grid::Grid(glm::ivec2 size) :
 
 	m_ShaderProgram.setAttribute("position", 3, sizeof(VertexInfo), offsetof(VertexInfo, position));
 	m_ShaderProgram.setAttribute("color", 4, sizeof(VertexInfo), offsetof(VertexInfo, color));
-
+	m_ShaderProgram.setAttribute("uv", 2, sizeof(VertexInfo), offsetof(VertexInfo, uv));
+	
 	glGenBuffers(1, &ibo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
@@ -128,7 +130,7 @@ void Grid::DrawMesh() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-const glm::ivec2& Grid::GetSize() const
+const glm::uvec2& Grid::GetSize() const
 {
 	return m_Size;
 }

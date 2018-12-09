@@ -7,16 +7,14 @@ class Transform;
 class Grid
 {
 public:
-	Grid(glm::ivec2 size);
+	Grid(glm::uvec2 size);
 
 	void Draw(float time, const glm::mat4& projection, const glm::mat4& view, const Transform& localTransform);
 	void DrawMesh() const;
 
-	const glm::ivec2& GetSize() const;
-
-
+	const glm::uvec2& GetSize() const;
 private:
-	glm::ivec2 m_Size;
+	glm::uvec2 m_Size;
 
 	int m_TotalIndices;
 

@@ -10,6 +10,7 @@ public:
 
 	void Draw(float time, const glm::mat4& projection, const glm::mat4& view);
 
+	const glm::vec3& GetWorldPosition() const;
 	const glm::mat4& GetProjectionMatrix() const;
 	const glm::mat4& GetViewMatrix() const;
 	
@@ -24,8 +25,7 @@ private:
 	Transform m_DebugCameraTransform;
 	Transform m_RenderCameraTransform;
 	
-	glm::vec3 m_CameraDirection;
-	glm::vec3 m_CameraUp;
+	glm::vec3 m_RenderCameraWorldPosition;
 	glm::mat4 m_ViewMatrix;
 	glm::mat4 m_ProjectionMatrix;
 };

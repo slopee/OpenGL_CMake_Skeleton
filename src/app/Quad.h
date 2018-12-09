@@ -1,24 +1,20 @@
 #pragma once
 #include <graphic/Shader.hpp>
 #include <graphic/ShaderProgram.h>
+#include "graphic/Renderable.h"
 
-class Quad
+class Grid;
+
+class Quad : public Renderable
 {
 public:
-	Quad(float size);
-
-	void Draw(float time, const glm::mat4& projection, const glm::mat4& view);
-
+	Quad(float size, Grid* grid);
 	void SetSize(float newSize);
+
+protected:
+	void OnDraw(float time, const Camera& camera) override;
 
 private:
 	float m_Size;
-
-	Shader m_VertexShader;
-	Shader m_FragmentShader;
-	ShaderProgram m_ShaderProgram;
-
-	GLuint m_Vao; 
-	GLuint m_Vbo;
-	GLuint m_Ibo;
+	Grid* m_Grid;
 };

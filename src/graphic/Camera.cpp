@@ -27,14 +27,18 @@ Camera::Camera(float height, float windowRatio)
 {
 	m_DebugCameraTransform.position.z = -15.0f;
 	m_DebugCameraTransform.rotation.y = 90.0f;
-	m_RenderCameraTransform.position.z = -10.0f;
+
+	m_RenderCameraTransform.position.z = -71.0f;
+	m_RenderCameraTransform.position.y = 10.0f;
+	m_RenderCameraTransform.position.x = -25.0f;
+	m_RenderCameraTransform.rotation.x = 25.0f;
 
 	debugAxis = new Axis();	
 
 	CalculateProjectionMatrix(height, windowRatio);
 	CalculateViewMatrix();
 
-	cameraDebugDrawer = new CameraDebugDrawer(m_RenderCameraTransform, fov, NEAR_DIST, FAR_DIST, ratio);
+	//cameraDebugDrawer = new CameraDebugDrawer(m_RenderCameraTransform, fov, NEAR_DIST, FAR_DIST, ratio);
 
 	RegisterInputEvents();
 }
@@ -47,6 +51,12 @@ void Camera::Draw(float time, const glm::mat4& projection, const glm::mat4& view
 		cameraDebugDrawer->Draw(time, projection, view);
 		debugAxis->Draw(time, projection, m_RenderCameraTransform.rotation);
 	}
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+const glm::vec3& Camera::GetWorldPosition() const
+{
+	return m_RenderCameraWorldPosition;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -81,8 +91,8 @@ void Camera::CalculateViewMatrix()
 
 	if (!isDebugCameraOn)
 	{
-		m_CameraDirection = glm::vec3(m_ViewMatrix[0][2], m_ViewMatrix[1][2], m_ViewMatrix[2][2]);
-		m_CameraUp = glm::vec3(m_ViewMatrix[0][1], m_ViewMatrix[1][1], m_ViewMatrix[2][1]);
+		const auto inverseTransform = m_RenderCameraTransform.GetInverseTransformMatrix();
+		m_RenderCameraWorldPosition = glm::vec3(inverseTransform * glm::vec4(0.0f, 0.0f, 0.0, 1.0f));
 
 		if (cameraDebugDrawer != nullptr)
 		{

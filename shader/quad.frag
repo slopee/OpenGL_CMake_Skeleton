@@ -1,6 +1,7 @@
 #version 450
 
 uniform sampler2D textureSampler;
+
 in vec4 fColor;
 in vec2 fUv;
 // output

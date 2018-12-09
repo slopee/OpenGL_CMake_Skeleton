@@ -13,6 +13,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <system/Input.h>
+#include "utils/glError.hpp"
 
 using namespace std;
 
@@ -45,12 +46,12 @@ Application::Application():
 
     // setting the opengl version
     int major = 4;
-    int minor = 5;
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, major);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minor);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    int minor = 6;
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, major);	
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minor);	
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);	
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
+	
     // create the window
     window = glfwCreateWindow(width,height,title.c_str(),NULL,NULL);
     if (!window)
@@ -69,20 +70,20 @@ Application::Application():
         glfwTerminate();
         throw std::runtime_error(string("Could initialize GLEW, error = ") + (const char*)glewGetErrorString(err));
 	}
-
-
+	
     // get version info
     const GLubyte* renderer = glGetString (GL_RENDERER);
     const GLubyte* version = glGetString (GL_VERSION); 
     cout << "Renderer: " << renderer << endl;
     cout << "OpenGL version supported " << version << endl;
-
+	
     // opengl configuration
-    glEnable (GL_DEPTH_TEST); // enable depth-testing
+    glEnable (GL_DEPTH_TEST); // enable depth-testing	
     glDepthFunc (GL_LESS); // depth-testing interprets a smaller value as "closer"
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
+	glEnable(GL_BLEND);	
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);	
+	
 		
 	// Keyboard events
 	Input::RegisterToGlfwCallbacks(window);

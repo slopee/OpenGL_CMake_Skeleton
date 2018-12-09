@@ -2,7 +2,9 @@
 #include "Grid.h"
 #include <vector>
 #include <glm/gtc/matrix_transform.inl>
-#include "graphic/Transform.h"
+#include <graphic/Transform.h>
+#include <graphic/BoundingBox.h>
+#include <app/QuadTree.h>
 
 //---------------------------------------------------------------------------------------------------------------------
 Cube::Cube(float size, Grid* const grid) :
@@ -10,15 +12,19 @@ Cube::Cube(float size, Grid* const grid) :
 	m_Grid(grid),
 	m_VertexShader(SHADER_DIR"/cube.vert", GL_VERTEX_SHADER),
 	m_FragmentShader(SHADER_DIR"/cube.frag", GL_FRAGMENT_SHADER),
-	m_ShaderProgram({ m_VertexShader,m_FragmentShader })
+	m_ShaderProgram({ m_VertexShader,m_FragmentShader }),
+	m_QuadTreeVertexShader(SHADER_DIR"/quadtree.vert", GL_VERTEX_SHADER),
+	m_QuadTreeFragmentShader(SHADER_DIR"/quadtree.frag", GL_FRAGMENT_SHADER),
+	m_QuadTreeShaderProgram({ m_QuadTreeVertexShader,m_QuadTreeFragmentShader })
 {
 	const auto& gridSize = m_Grid->GetSize();
 	const glm::vec2 gridHalfSize(gridSize.x / 2.0f, gridSize.y / 2.0f);
-
+	
 	// Front
 	Transform frontFace;
 	frontFace.position = glm::vec3(0, 0, gridHalfSize.y);
 	m_FacesTransforms.push_back(frontFace);
+//	m_QuadTree = new QuadTree(BoundingBox(0, 0, size, size), glm::vec2(10.0f, 40.0f), frontFace.GetTransformMatrix());
 	
 	//Left
 	Transform leftFace;
@@ -52,8 +58,19 @@ Cube::Cube(float size, Grid* const grid) :
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void Cube::Draw(float time, const glm::mat4& projection, const glm::mat4& view)
+void Cube::Draw(float time, const glm::mat4& projection, const glm::mat4& view, const glm::vec3& cameraPosition)
 {
+	m_QuadTreeShaderProgram.use();
+
+	// Set the uniforms
+	m_QuadTreeShaderProgram.setUniform("projection", projection);
+	m_QuadTreeShaderProgram.setUniform("view", view);
+	m_QuadTreeShaderProgram.setUniform("size", m_Size);
+
+//	m_QuadTree->Draw(time, m_QuadTreeShaderProgram, *m_Grid, view, cameraPosition);
+
+	m_QuadTreeShaderProgram.unuse();
+	/*
 	m_ShaderProgram.use();
 
 	// Set the uniforms
@@ -81,6 +98,7 @@ void Cube::Draw(float time, const glm::mat4& projection, const glm::mat4& view)
 	
 	// Unbind program
 	m_ShaderProgram.unuse();
+	*/
 }
 
 
