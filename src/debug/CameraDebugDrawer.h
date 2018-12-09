@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 #include "graphic/ShaderProgram.h"
 #include <vector>
+#include "graphic/Camera.h"
 
 class Transform;
 
@@ -11,7 +12,7 @@ class CameraDebugDrawer
 {
 public:
 	CameraDebugDrawer(
-		const Transform& cameraTransform,
+		const Camera::LookAtVectors& cameraLookAtVector,
 		float fov,
 		float nearDist,
 		float farDist,
@@ -19,7 +20,7 @@ public:
 
 
 	void Update(
-		const Transform& cameraTransform,
+		const Camera::LookAtVectors& cameraLookAtVector,
 		float fov,
 		float nearDist,
 		float farDist,
@@ -28,7 +29,7 @@ public:
 
 private:
 	std::vector<glm::vec3> CalculateVerticesPositions(
-		const Transform& cameraTransform,
+		const Camera::LookAtVectors& cameraLookAtVector,
 		float fov,
 		float nearDist,
 		float farDist,

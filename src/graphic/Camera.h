@@ -3,8 +3,20 @@
 #include <glm/gtc/quaternion.hpp>
 #include "Transform.h"
 
+class CameraDebugDrawer;
+
 class Camera
 {
+	struct LookAtVectors
+	{
+		glm::vec3 position;
+		glm::vec3 viewDirection;
+		glm::vec3 up;
+
+		LookAtVectors();
+		glm::vec3 CalculateRight() const;
+	};
+
 public:
 	Camera(float height, float windowRatio);
 
@@ -18,14 +30,14 @@ private:
 	void CalculateProjectionMatrix(float height, float windowRatio);
 	void CalculateViewMatrix();
 	void RegisterInputEvents();
-
-	Transform& GetCurrentActiveCamera();
-
-private:	
-	Transform m_DebugCameraTransform;
-	Transform m_RenderCameraTransform;
+	LookAtVectors& Camera::GetCurrentActiveCameraLookAt();
 	
-	glm::vec3 m_RenderCameraWorldPosition;
+private:	
+	LookAtVectors m_DebugCameraLookAt;
+	LookAtVectors m_RenderCameraLookAt;
+	
 	glm::mat4 m_ViewMatrix;
 	glm::mat4 m_ProjectionMatrix;
+
+	friend CameraDebugDrawer;
 };

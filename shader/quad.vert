@@ -13,8 +13,9 @@ out vec2 fUv;
 void main(void)
 {
 		fUv = uv;
-		vec4 heightmap = texture(textureSampler, fUv);
-		vec3 height = vec3(0, 0, mix(heightmap.r, heightmap.b, heightmap.b) * 30);
-    vec4 newPosition = view * gridScale * vec4(position + height,1.0);
+		//vec4 heightmap = texture(textureSampler, fUv);
+		//vec3 height = vec3(0, 0, mix(heightmap.r, heightmap.b, heightmap.b) * 30);
+    //vec4 newPosition = view * gridScale * vec4(position + height,1.0);
+		vec4 newPosition = view * gridScale * vec4(position,1.0);
     gl_Position = projection * newPosition;
 }

@@ -25,9 +25,9 @@ glm::mat4 Transform::GetInverseTransformMatrix() const
 //---------------------------------------------------------------------------------------------------------------------
 glm::mat4 Transform::GetRotationMatrix() const
 {
-	const glm::quat qPitch = glm::angleAxis(glm::radians(rotation.x), glm::vec3(1, 0, 0));
-	const glm::quat qYaw = glm::angleAxis(glm::radians(rotation.y), glm::vec3(0, 1, 0));
-	const glm::quat qRoll = glm::angleAxis(glm::radians(rotation.z), glm::vec3(0, 0, 1));
+	const glm::quat qRoll = glm::angleAxis(glm::radians(rotation.x), glm::vec3(1, 0, 0));
+	const glm::quat qPitch = glm::angleAxis(glm::radians(rotation.y), glm::vec3(0, 1, 0));
+	const glm::quat qYaw = glm::angleAxis(glm::radians(rotation.z), glm::vec3(0, 0, 1));
 
 	const glm::quat rotQuat = qYaw * qPitch * qRoll;
 

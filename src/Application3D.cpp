@@ -31,8 +31,8 @@ Application3D::Application3D():
 	Application()
 {
 	glCheckError(__FILE__,__LINE__);	
-	m_Grid = new Grid(glm::uvec2(15, 15));	
-	m_Quad = new Quad(10, m_Grid);
+	m_Grid = new Grid(glm::uvec2(64, 64));	
+	m_Quad = new Quad(24, m_Grid);
 
 	Transform topFace;
 	topFace.position = glm::vec3(0, 0, 0);
@@ -79,8 +79,8 @@ void Application3D::loop()
 	m_Heightmap->BindTexture();
 	//Transform defaultT;
 	//m_Grid->Draw(t, projection, view, defaultT);
-	//m_Quad->Draw(t, *m_Camera);
-	m_QuadTree->Draw(t, *m_Camera);
+	m_Quad->Draw(t, *m_Camera);
+	//m_QuadTree->Draw(t, *m_Camera);
 
 	// Debug camera info
 	m_Camera->Draw(t, projection, view);	

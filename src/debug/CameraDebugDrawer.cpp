@@ -6,7 +6,7 @@ static std::vector<GLuint> indices;
 
 //---------------------------------------------------------------------------------------------------------------------
 CameraDebugDrawer::CameraDebugDrawer(
-	const Transform& cameraTransform,
+	const Camera::LookAtVectors& cameraLookAtVector,
 	float fov,
 	float nearDist,
 	float farDist,
@@ -18,7 +18,7 @@ CameraDebugDrawer::CameraDebugDrawer(
 	glGenVertexArrays(1, &m_Vao);
 	glBindVertexArray(m_Vao);
 
-	auto vertices = CalculateVerticesPositions(cameraTransform, fov, nearDist, farDist, ratio);
+	auto vertices = CalculateVerticesPositions(cameraLookAtVector, fov, nearDist, farDist, ratio);
 		
 	// Look Vector
 	indices.push_back(0);
@@ -27,7 +27,7 @@ CameraDebugDrawer::CameraDebugDrawer(
 	// Up vector
 	indices.push_back(0);
 	indices.push_back(2);
-
+	
 	// Near Plane	
 	indices.push_back(0);
 	indices.push_back(3);
@@ -45,7 +45,7 @@ CameraDebugDrawer::CameraDebugDrawer(
 	indices.push_back(6);
 	indices.push_back(6);
 	indices.push_back(3);
-
+	
 	// Far Plane
 	indices.push_back(0);
 	indices.push_back(7);
@@ -63,7 +63,7 @@ CameraDebugDrawer::CameraDebugDrawer(
 	indices.push_back(10);
 	indices.push_back(10);
 	indices.push_back(7);
-
+	
 	GLuint ibo;
 	glGenBuffers(1, &m_Vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, m_Vbo);
@@ -85,13 +85,13 @@ CameraDebugDrawer::CameraDebugDrawer(
 
 //---------------------------------------------------------------------------------------------------------------------
 void CameraDebugDrawer::Update(
-	const Transform& cameraTransform,
+	const Camera::LookAtVectors& cameraLookAtVector,
 	float fov, 
 	float nearDist, 
 	float farDist, 
 	float ratio)
 {
-	auto vertices = CalculateVerticesPositions(cameraTransform, fov, nearDist, farDist, ratio);
+	auto vertices = CalculateVerticesPositions(cameraLookAtVector, fov, nearDist, farDist, ratio);
 		
 	glBindVertexArray(m_Vao);
 	glBindBuffer(GL_ARRAY_BUFFER, m_Vbo);
@@ -130,50 +130,43 @@ void CameraDebugDrawer::Draw(float time, const glm::mat4& projection, const glm:
 
 //---------------------------------------------------------------------------------------------------------------------
 std::vector<glm::vec3> CameraDebugDrawer::CalculateVerticesPositions(
-	const Transform& cameraTransform,
+	const Camera::LookAtVectors& cameraLookAtVector,
 	float fov, 
 	float nearDist, 
 	float farDist, 
 	float ratio)
 {
 	std::vector<glm::vec3> vertices;	
-
-	const auto inverseTransform = cameraTransform.GetInverseTransformMatrix();
-
-	const auto cameraPosition = glm::vec3(inverseTransform * glm::vec4(0.0f, 0.0f, 0.0, 1.0f));
-	const auto cameraDirection = glm::vec3(inverseTransform * glm::vec4(0.0f, 0.0f, -1.0f, 1.0f));
-	const auto cameraUp = glm::vec3(inverseTransform * glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
-	const auto cameraRight = glm::vec3(inverseTransform * glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
 	
-	const auto unitDirection = cameraDirection - cameraPosition;
-	const auto unitUp = cameraUp - cameraPosition;
-	const auto unitRight = cameraRight - cameraPosition;
-
+	const auto& cameraPosition = cameraLookAtVector.position;
+	const auto& cameraDirection = glm::normalize(cameraLookAtVector.viewDirection);
+	const auto& cameraUp = glm::normalize(cameraLookAtVector.up);
+	const auto cameraRight = cameraLookAtVector.CalculateRight();
+	
 	vertices.push_back(cameraPosition); // 0
-	vertices.push_back(cameraDirection); // 1		
-	vertices.push_back(cameraUp); // 2
+	vertices.push_back(cameraPosition + cameraDirection); // 1		
+	vertices.push_back(cameraPosition + cameraUp); // 2
 		
 	// Near plane
 	nearDist -= 0.05f;
 	const float nearHeight = 2 * tan(fov / 2) * nearDist;
 	const float nearWidth = nearHeight * ratio;
-	const auto nearCenter = cameraPosition + (unitDirection * nearDist);
+	const auto nearCenter = cameraPosition + (cameraDirection * nearDist);
 
-	vertices.push_back(nearCenter + (unitUp * nearHeight / 2.0f) - (unitRight * nearWidth / 2.0f)); // 3
-	vertices.push_back(nearCenter + (unitUp * nearHeight / 2.0f) + (unitRight * nearWidth / 2.0f)); // 4
-	vertices.push_back(nearCenter - (unitUp * nearHeight / 2.0f) + (unitRight * nearWidth / 2.0f)); // 5
-	vertices.push_back(nearCenter - (unitUp * nearHeight / 2.0f) - (unitRight * nearWidth / 2.0f)); // 6
-	
+	vertices.push_back(nearCenter + (cameraUp * nearHeight / 2.0f) - (cameraRight * nearWidth / 2.0f)); // 3
+	vertices.push_back(nearCenter + (cameraUp * nearHeight / 2.0f) + (cameraRight * nearWidth / 2.0f)); // 4
+	vertices.push_back(nearCenter - (cameraUp * nearHeight / 2.0f) + (cameraRight * nearWidth / 2.0f)); // 5
+	vertices.push_back(nearCenter - (cameraUp * nearHeight / 2.0f) - (cameraRight * nearWidth / 2.0f)); // 6
+																									
 	// Far plane
 	farDist -= 0.05f;
 	const float farHeight = 2 * tan(fov / 2) * farDist;
 	const float farWidth = farHeight * ratio;
-	const auto farCenter = cameraDirection + (unitDirection * farDist);
+	const auto farCenter = cameraDirection + (cameraDirection * farDist);
 
-	vertices.push_back(farCenter + (unitUp * farHeight / 2.0f) - (unitRight * farWidth / 2.0f)); // 7
-	vertices.push_back(farCenter + (unitUp * farHeight / 2.0f) + (unitRight * farWidth / 2.0f)); // 8
-	vertices.push_back(farCenter - (unitUp * farHeight / 2.0f) + (unitRight * farWidth / 2.0f)); // 9
-	vertices.push_back(farCenter - (unitUp * farHeight / 2.0f) - (unitRight * farWidth / 2.0f)); // 10
-	
+	vertices.push_back(farCenter + (cameraUp * farHeight / 2.0f) - (cameraRight * farWidth / 2.0f)); // 7
+	vertices.push_back(farCenter + (cameraUp * farHeight / 2.0f) + (cameraRight * farWidth / 2.0f)); // 8
+	vertices.push_back(farCenter - (cameraUp * farHeight / 2.0f) + (cameraRight * farWidth / 2.0f)); // 9
+	vertices.push_back(farCenter - (cameraUp * farHeight / 2.0f) - (cameraRight * farWidth / 2.0f)); // 10	
 	return vertices;
 }
