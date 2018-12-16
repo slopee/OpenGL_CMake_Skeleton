@@ -9,7 +9,8 @@ QuadTree::QuadTree(const BoundingBox& boundingBox, const glm::vec2& distanceConf
 		Shader(SHADER_DIR"/quadtree.vert", GL_VERTEX_SHADER),
 		Shader(SHADER_DIR"/quadtree.frag", GL_FRAGMENT_SHADER)),
 	m_DistanceConfig(distanceConfig),
-	m_QuadTransform(quadTransform)	
+	m_QuadTransform(quadTransform),
+	m_PatchMesh(std::make_shared<QuadTreePatchMesh>(32))
 {
 	m_LevelsConfig.push_back(LevelConfig(0.0f, 0.35f));
 	m_LevelsConfig.push_back(LevelConfig(0.35f, 0.60f));
@@ -24,12 +25,33 @@ QuadTree::QuadTree(const BoundingBox& boundingBox, const glm::vec2& distanceConf
 		finalDistances[j].y = distanceConfig.x + (m_LevelsConfig[i].max * distDifference);
 	}
 
-	m_RootNode = new QuadTreeNode(boundingBox, 0, glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), finalDistances, grid);
+	m_RootNode = std::make_unique<QuadTreeNode>(
+		boundingBox, 0, glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), finalDistances, m_PatchMesh, nullptr, m_Nodes);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 void QuadTree::OnDraw(float time, const Camera& camera)
 {
 	m_ShaderProgram.setUniform("treeTransformation", m_QuadTransform);	
-	m_RootNode->Draw(m_ShaderProgram, camera.GetViewMatrix(), camera.GetWorldPosition());
+
+	std::vector<std::unordered_set<int>> nodesToDraw(m_LevelsConfig.size());
+	m_RootNode->ResetNodes();
+	m_RootNode->SelectNodesToDraw(nodesToDraw, camera, m_QuadTransform, 0);
+
+	for(auto lodLevel : nodesToDraw)
+	{
+		for(auto node : lodLevel)
+		{
+			if(!m_Nodes[node].expired())
+			{
+				m_Nodes[node].lock()->DrawNode(m_ShaderProgram);
+			}			
+			else if(node == 1)
+			{
+				m_RootNode->DrawNode(m_ShaderProgram);
+			}
+		}
+	}
+
+	//m_RootNode->Draw(m_ShaderProgram, camera, m_QuadTransform, 3);
 }

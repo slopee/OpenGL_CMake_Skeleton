@@ -31,13 +31,13 @@ Application3D::Application3D():
 	Application()
 {
 	glCheckError(__FILE__,__LINE__);	
-	m_Grid = new Grid(glm::uvec2(64, 64));	
+	m_Grid = new Grid(glm::uvec2(16, 16));	
 	m_Quad = new Quad(24, m_Grid);
 
 	Transform topFace;
 	topFace.position = glm::vec3(0, 0, 0);
 	topFace.rotation = glm::vec3(90.0f, 0, 0);	
-	m_QuadTree = new QuadTree(BoundingBox(0, 0, 50, 50), glm::vec2(1, 80), topFace.GetTransformMatrix(), m_Grid);
+	m_QuadTree = new QuadTree(BoundingBox(-25, -25, 50, 50), glm::vec2(1, 80), topFace.GetTransformMatrix(), m_Grid);
 	
 	m_Camera = new Camera(getHeight(), getWindowRatio());	
 	m_Heightmap = new Heightmap(12, 12);
@@ -79,8 +79,8 @@ void Application3D::loop()
 	m_Heightmap->BindTexture();
 	//Transform defaultT;
 	//m_Grid->Draw(t, projection, view, defaultT);
-	m_Quad->Draw(t, *m_Camera);
-	//m_QuadTree->Draw(t, *m_Camera);
+	//m_Quad->Draw(t, *m_Camera);
+	m_QuadTree->Draw(t, *m_Camera);
 
 	// Debug camera info
 	m_Camera->Draw(t, projection, view);	

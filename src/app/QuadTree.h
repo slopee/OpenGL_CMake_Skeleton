@@ -3,6 +3,9 @@
 #include <vector>
 #include <glm/detail/type_mat4x4.hpp>
 #include "graphic/Renderable.h"
+#include "QuadTreePatchMesh.h"
+#include <memory>
+#include <unordered_map>
 
 class ShaderProgram;
 class Grid;
@@ -35,5 +38,7 @@ private:
 	glm::vec2 m_DistanceConfig;
 	glm::mat4 m_QuadTransform;	
 	std::vector<LevelConfig> m_LevelsConfig;
-	QuadTreeNode* m_RootNode;	
+	std::unique_ptr<QuadTreeNode> m_RootNode;	
+	std::shared_ptr<QuadTreePatchMesh> m_PatchMesh;
+	std::unordered_map<int, std::weak_ptr<QuadTreeNode>> m_Nodes;
 };

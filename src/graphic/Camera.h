@@ -25,6 +25,9 @@ public:
 	const glm::vec3& GetWorldPosition() const;
 	const glm::mat4& GetProjectionMatrix() const;
 	const glm::mat4& GetViewMatrix() const;
+
+	const glm::mat4& GetRenderViewMatrix() const;
+	const glm::mat4& GetRenderProjectionMatrix() const;
 	
 private:
 	void CalculateProjectionMatrix(float height, float windowRatio);

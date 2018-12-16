@@ -10,7 +10,7 @@
 static const float PAN_MULTIPLIER = 0.01f;
 static const float ZOOM_DISTANCE = 0.5f;
 static const float NEAR_DIST = 0.1f;
-static const float FAR_DIST = 100.0f;
+static const float FAR_DIST = 500.0f;
 static const float ROTATION_MULTIPIER = 0.01f;
 
 using namespace glm;
@@ -23,7 +23,7 @@ static CameraDebugDrawer* cameraDebugDrawer = nullptr;
 
 //---------------------------------------------------------------------------------------------------------------------
 Camera::LookAtVectors::LookAtVectors()
-	: position(0.0f, 0.0f, -15.0f), viewDirection(0.0f, 0.0f, 1.0f), up(0.0f, 1.0f, 0.0f)
+	: position(0.0f, 0.0f, 48.5f), viewDirection(0.0f, 0.0f, -1.0f), up(0.0f, 1.0f, 0.0f)
 {
 }
 
@@ -36,16 +36,8 @@ glm::vec3 Camera::LookAtVectors::CalculateRight() const
 //---------------------------------------------------------------------------------------------------------------------
 Camera::Camera(float height, float windowRatio)	
 {
-	/*
-	m_DebugCameraTransform.position.z = -15.0f;
-	m_DebugCameraTransform.rotation.y = 90.0f;
-
-	m_RenderCameraTransform.position.z = -31.0f;
-	*/
-	//m_RenderCameraTransform.position.y = 10.0f;
-	//m_RenderCameraTransform.position.x = -25.0f;
-	//m_RenderCameraTransform.rotation.x = -45.0f;
-	//m_RenderCameraTransform.rotation.z = -65.0f;
+	m_RenderCameraLookAt.position = glm::vec3(0.0f, 45.0f, 55.0f);
+	m_RenderCameraLookAt.viewDirection = glm::vec3(0.0f, -0.55f, -1.0f);
 
 	debugAxis = new Axis();	
 
