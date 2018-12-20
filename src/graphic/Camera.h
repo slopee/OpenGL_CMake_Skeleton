@@ -33,7 +33,7 @@ private:
 	void CalculateProjectionMatrix(float height, float windowRatio);
 	void CalculateViewMatrix();
 	void RegisterInputEvents();
-	LookAtVectors& Camera::GetCurrentActiveCameraLookAt();
+	LookAtVectors& GetCurrentActiveCameraLookAt();
 	
 private:	
 	LookAtVectors m_DebugCameraLookAt;

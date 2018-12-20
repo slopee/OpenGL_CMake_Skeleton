@@ -10,6 +10,8 @@ project (opengl-skeleton)
 set(CMAKE_CXX_STANDARD 17)
 add_definitions(-Wall)
 add_definitions(-fno-rtti)
+add_definitions(-D_ENABLE_EXTENDED_ALIGNED_STORAGE)
+
 
 # ┌──────────────────────────────────────────────────────────────────┐
 # │  Load libraries                                                  │

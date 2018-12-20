@@ -1,4 +1,7 @@
 #include "QuadTreePatchMesh.h"
+#include "utils/glError.hpp"
+
+static const int MAX_INSTANCES = 64;
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 QuadTreePatchMesh::QuadTreePatchMesh(float size) : m_Size(size), m_Vbo(-1)
@@ -48,12 +51,21 @@ QuadTreePatchMesh::QuadTreePatchMesh(float size) : m_Size(size), m_Vbo(-1)
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void QuadTreePatchMesh::DrawMesh(Junction junction) const
+void QuadTreePatchMesh::DrawMesh(Junction junction, const std::vector<InstanceData>& instances) const
 {
-	if (junction < Junction::Count)
+	assert(instances.size() <= MAX_INSTANCES);
+	if (junction < Junction::Count && !instances.empty())
 	{
-		glBindVertexArray(m_Vaos[junction]);
-		glDrawElements(GL_TRIANGLES, m_TotalIndices[junction], GL_UNSIGNED_INT, NULL);
+		const auto vao = m_Vaos[junction];
+		const auto instanceVbo = m_InstanceVbo[junction];
+
+		// Update instance information
+		glBindBuffer(GL_ARRAY_BUFFER, instanceVbo);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, instances.size() * sizeof(InstanceData), instances.data());		
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+				
+		glBindVertexArray(vao);		
+		glDrawElementsInstanced(GL_TRIANGLES, m_TotalIndices[junction], GL_UNSIGNED_INT, nullptr, instances.size());
 		glBindVertexArray(0);
 	}
 }
@@ -70,11 +82,11 @@ QuadTreePatchMesh::VertexInfo::VertexInfo(glm::vec3 pos, glm::vec2 uv) : positio
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void QuadTreePatchMesh::GenerateVao(int index, const std::vector<VertexInfo>& vertices,
+void QuadTreePatchMesh::GenerateVao(Junction junction, const std::vector<VertexInfo>& vertices,
                                     const std::vector<GLuint>& indices)
 {
-	glGenVertexArrays(1, &m_Vaos[index]);
-	glBindVertexArray(m_Vaos[index]);
+	glGenVertexArrays(1, &m_Vaos[junction]);
+	glBindVertexArray(m_Vaos[junction]);
 
 	if (m_Vbo == -1)
 	{
@@ -98,13 +110,37 @@ void QuadTreePatchMesh::GenerateVao(int index, const std::vector<VertexInfo>& ve
 	glEnableVertexAttribArray(1);
 	glVertexAttribFormat(1, 2, GL_FLOAT, GL_FALSE, offsetof(VertexInfo, uv));
 	glVertexAttribBinding(1, 0);
+		
+	// Instancing data	
+	glGenBuffers(1, &m_InstanceVbo[junction]);
+	glBindBuffer(GL_ARRAY_BUFFER, m_InstanceVbo[junction]);
+	glBufferData(GL_ARRAY_BUFFER, MAX_INSTANCES * sizeof(InstanceData), nullptr, GL_DYNAMIC_DRAW);
 
+	glBindVertexBuffer(1, m_InstanceVbo[junction], 0, sizeof(InstanceData));	
+	glVertexBindingDivisor(1, 1);
+	
+	glEnableVertexAttribArray(2);	
+	glVertexAttribFormat(2, 3, GL_FLOAT, GL_FALSE, offsetof(InstanceData, scale));
+	glVertexAttribBinding(2, 1);
+	
+	glEnableVertexAttribArray(3);
+	glVertexAttribFormat(3, 3, GL_FLOAT, GL_FALSE, offsetof(InstanceData, color));
+	glVertexAttribBinding(3, 1);
+
+	glEnableVertexAttribArray(4);
+	glVertexAttribFormat(4, 3, GL_FLOAT, GL_FALSE, offsetof(InstanceData, translation));
+	glVertexAttribBinding(4, 1);
+
+	glEnableVertexAttribArray(5);
+	glVertexAttribFormat(5, 4, GL_FLOAT, GL_FALSE, offsetof(InstanceData, uvLimits));
+	glVertexAttribBinding(5, 1);
+	
 	// EBO
 	GLuint ibo;
 	glGenBuffers(1, &ibo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
-	m_TotalIndices[index] = indices.size();
+	m_TotalIndices[junction] = indices.size();
 
 	glBindVertexArray(0);
 }

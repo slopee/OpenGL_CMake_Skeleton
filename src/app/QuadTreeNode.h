@@ -30,8 +30,7 @@ public:
 		const glm::mat4& quadTransform,
 		const int maxLodLevel);
 
-	void DrawNode(ShaderProgram& shaderProgram) const;
-	
+	std::tuple<QuadTreePatchMesh::Junction, QuadTreePatchMesh::InstanceData> GetNodeDrawData() const;	
 
 private:
 	enum NeighbourPosition

@@ -77,7 +77,12 @@ Application::Application():
     cout << "Renderer: " << renderer << endl;
     cout << "OpenGL version supported " << version << endl;
 	
-    // opengl configuration
+    // opengl configuration	
+	glEnable(GL_DEBUG_OUTPUT);
+	glDebugMessageCallback(glCallbackFunction, nullptr);
+	GLuint unusedIds = 0;
+	glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, &unusedIds, true);
+
     glEnable (GL_DEPTH_TEST); // enable depth-testing	
     glDepthFunc (GL_LESS); // depth-testing interprets a smaller value as "closer"
 	
@@ -182,3 +187,4 @@ bool Application::windowDimensionChange()
 {
     return dimensionChange;
 }
+

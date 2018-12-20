@@ -140,7 +140,7 @@ void QuadTreeNode::SelectNodesToDraw(std::vector<std::unordered_set<int>>& nodes
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void QuadTreeNode::DrawNode(ShaderProgram& shaderProgram) const
+std::tuple<QuadTreePatchMesh::Junction, QuadTreePatchMesh::InstanceData> QuadTreeNode::GetNodeDrawData() const
 {
 	static glm::vec3 colors[4]{
 		glm::vec3(1.0f, 0.0f, 0.0f),
@@ -148,17 +148,17 @@ void QuadTreeNode::DrawNode(ShaderProgram& shaderProgram) const
 		glm::vec3(0.0f, 0.0f, 1.0f),
 		glm::vec3(0.5f, 0.5f, 0.0f)
 	};
-
 	const auto patchSize = m_PatchMesh->GetPatchSize();
-	glm::mat4 scale = glm::scale(glm::mat4(),
-		glm::vec3(m_BoundingBox.GetWidth() / patchSize, m_BoundingBox.GetHeight() / patchSize,
-			1.0f));
+	const auto scale = glm::vec3(m_BoundingBox.GetWidth() / patchSize, m_BoundingBox.GetHeight() / patchSize, 1.0f);
 
-	shaderProgram.setUniform("scale", scale);
-	shaderProgram.setUniform("nodeColor", colors[m_CurrentLevel]);
-	shaderProgram.setUniform("nodeTransformation", m_Transform.GetTransformMatrix());
-	shaderProgram.setUniform("uvLimits", m_UvLimits);	
-	m_PatchMesh->DrawMesh(GetMeshJunctionType());
+	return std::make_tuple(
+		GetMeshJunctionType(), 
+		QuadTreePatchMesh::InstanceData { 
+			scale, 
+			colors[m_CurrentLevel], 
+			m_Transform.position, 
+			m_UvLimits 
+		});
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------

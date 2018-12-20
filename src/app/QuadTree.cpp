@@ -2,6 +2,7 @@
 #include "QuadTreeNode.h"
 #include <graphic/ShaderProgram.h>
 #include <graphic/Camera.h>
+#include "utils/glError.hpp"
 
 //---------------------------------------------------------------------------------------------------------------------
 QuadTree::QuadTree(const BoundingBox& boundingBox, const glm::vec2& distanceConfig, const glm::mat4& quadTransform, Grid* grid) :
@@ -37,20 +38,33 @@ void QuadTree::OnDraw(float time, const Camera& camera)
 	std::vector<std::unordered_set<int>> nodesToDraw(m_LevelsConfig.size());
 	m_RootNode->ResetNodes();
 	m_RootNode->SelectNodesToDraw(nodesToDraw, camera, m_QuadTransform, 0);
-
+	
+	std::vector<std::vector<QuadTreePatchMesh::InstanceData>> junctionData(QuadTreePatchMesh::Junction::Count);
+		
 	for(auto lodLevel : nodesToDraw)
 	{
 		for(auto node : lodLevel)
-		{
+		{			
 			if(!m_Nodes[node].expired())
 			{
-				m_Nodes[node].lock()->DrawNode(m_ShaderProgram);
+				auto [junction, instanceData] = m_Nodes[node].lock()->GetNodeDrawData();
+				junctionData[junction].push_back(instanceData);
 			}			
 			else if(node == 1)
 			{
-				m_RootNode->DrawNode(m_ShaderProgram);
+				auto[junction, instanceData] = m_RootNode->GetNodeDrawData();
+				junctionData[junction].push_back(instanceData);
 			}
 		}
+	}
+
+
+	for(int j = QuadTreePatchMesh::Junction::Complete; j < QuadTreePatchMesh::Junction::Count; ++j)
+	{
+		const auto& instances = junctionData[j];
+		const auto junction = static_cast<QuadTreePatchMesh::Junction>(j);
+				
+		m_PatchMesh->DrawMesh(junction, instances);		
 	}
 
 	//m_RootNode->Draw(m_ShaderProgram, camera, m_QuadTransform, 3);

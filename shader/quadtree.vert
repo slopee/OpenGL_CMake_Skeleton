@@ -1,19 +1,18 @@
-#version 450
+#version 460
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec2 uv;
+layout (location = 2) in vec3 scale;
+layout (location = 3) in vec3 nodeColor;
+layout (location = 4) in vec3 translation;
+layout (location = 5) in vec4 uvLimits;
 
 uniform mat4 projection;
 uniform mat4 view;
-uniform float size;
 
 uniform mat4 treeTransformation;
 
-uniform mat4 scale;
-uniform vec3 nodeColor;
-uniform mat4 nodeTransformation;
 uniform sampler2D textureSampler;
-uniform vec4 uvLimits;
 
 out vec4 fColor;
 
@@ -26,14 +25,8 @@ void main(void)
 
 		vec4 heightmap = texture(textureSampler, vec2(u, v));
 		vec3 height = vec3(0, 0, mix(heightmap.r, heightmap.b, heightmap.b) * -40);
-	  vec4 localPosition = treeTransformation * nodeTransformation * scale * vec4(position + height, 1.0);
-		//vec4 localPosition = treeTransformation * nodeTransformation * scale * vec4(position, 1.0);
-
-		/*
-		float positionLength = length(localPosition);
-		localPosition.xyz /= positionLength;
-		localPosition.xyz *= size;
-		*/
+	  vec4 localPosition = treeTransformation * (vec4(translation, 1.0f) + (vec4(scale, 1.0f) * vec4(position + height, 1.0)));
+		//vec4 localPosition = treeTransformation * vec4(position, 1.0);
 
     vec4 newPosition = view * localPosition;
     gl_Position = projection * newPosition;

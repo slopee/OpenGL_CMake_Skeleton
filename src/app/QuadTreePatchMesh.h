@@ -3,6 +3,8 @@
 #include <glm/detail/type_vec3.hpp>
 #include <vector>
 #include <glm/detail/type_vec2.hpp>
+#include <glm/detail/type_vec4.hpp>
+#include <unordered_map>
 
 class QuadTreePatchMesh
 {
@@ -22,8 +24,16 @@ public:
 		Count
 	};
 
+	struct InstanceData
+	{
+		glm::vec3 scale;
+		glm::vec3 color;
+		glm::vec3 translation;
+		glm::vec4 uvLimits;
+	};
+
 	QuadTreePatchMesh(float size);
-	void DrawMesh(Junction junction) const;
+	void DrawMesh(Junction junction, const std::vector<InstanceData>& instances) const;
 	float GetPatchSize() const;
 
 private:
@@ -36,7 +46,7 @@ private:
 	};
 
 private:
-	void GenerateVao(int index, const std::vector<VertexInfo>& vertices, const std::vector<GLuint>& indices);
+	void GenerateVao(Junction junction, const std::vector<VertexInfo>& vertices, const std::vector<GLuint>& indices);
 
 	void GenerateFullPatchVao(float size, const std::vector<VertexInfo>& vertices);
 	void GenerateTopVao(float size, const std::vector<VertexInfo>& vertices);
@@ -54,5 +64,6 @@ private:
 	float m_Size;
 	GLuint m_Vbo;
 	GLuint m_Vaos[Junction::Count];
+	GLuint m_InstanceVbo[Junction::Count];
 	int m_TotalIndices[Junction::Count];
 };
